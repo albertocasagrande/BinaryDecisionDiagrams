@@ -19,7 +19,7 @@ functions are stored as OBDD, it is possible to:
 
 In julia, type
 ```julia
-Pkg.add("BinaryDecisionDiagrams")
+julia> Pkg.clone("git://github.com/albertocasagrande/BinaryDecisionDiagrams.git")
 ```
 
 ## Usage
@@ -34,33 +34,33 @@ using BinaryDecisionDiagrams
 Create a BDD terminal node by using the method `BDD` with a single Boolean
 parameter  
 ```julia
-b1=BDD(true)
+julia> b1=BDD(true)
 "true"
 ```
 
 Create a non-terminal node by using the method `BDD` with three parameters:
 a variable name `var`, the BDD `low`, and the BDD `high`.  
 ```julia
-b2=BDD("a",BDD(false),BDD(true))
+julia> b2=BDD("a",BDD(false),BDD(true))
 "a"
 
-b3=BDD("b",BDD("c",b1,b1),b2)
+julia> b3=BDD("b",BDD("c",b1,b1),b2)
 "(~b | (b & a))"
 ```
 
 Partial evaluations of BDDs can be achieved through the method `restrict`.
 ```julia
-restrict(b3,"b",true)
+julia> restrict(b3,"b",true)
 "a"
 
-restrict(b3,"c",false)
+julia> restrict(b3,"c",false)
 "(~b | (b & a))"
 ```
 
 `Ordering` is an abstract type that represents ordering between variables.
 `ListOrdering`s are `Ordering`s built from arrays of variable names.
 ```julia
-O=ListOrdering(["c","b","a"])
+julia> O=ListOrdering(["c","b","a"])
 "(c,b,a)"
 ```
 
