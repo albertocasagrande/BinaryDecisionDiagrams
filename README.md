@@ -1,6 +1,6 @@
 # BinaryDecisionDiagrams
 
-[![Build Status](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams.jl.svg?branch=master)](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams.jl)
+[![Build Status](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams.svg?branch=master)](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams)
 
 This package provides implementations for both Binary Decision Diagrams (BDD)
 and Ordered Binary Decision Diagrams (OBDD) [Bryant86]. These data structures
