@@ -1,35 +1,28 @@
 abstract BDDNode
 
+BinBoolType = Union(Integer,Bool)
+
 type BDDTerminal <: BDDNode
   value::Bool
-  f_low::Union(Set{BDDNode},Nothing)
-  f_high::Union(Set{BDDNode},Nothing)
+  f_low::WeakKeyDict{BDDNode,Bool}
+  f_high::WeakKeyDict{BDDNode,Bool}
 
   Tnodes::Dict{Bool,BDDTerminal} = Dict()
-  function BDDTerminal(value::Bool)
+  function BDDTerminal(value::BinBoolType)
+    if value==0 || value==false
+      value=false
+    elseif value==1 || value==true
+      value=true
+    else
+      throw(ArgumentError("expected a binary value, got $(value)"))
+    end
+
     if !haskey(Tnodes,value)
-      Tnodes[value]=new(value,Set{BDDNode}(),Set{BDDNode}())
+      Tnodes[value]=new(value,WeakKeyDict{BDDNode,Bool}(),WeakKeyDict{BDDNode,Bool}())
     end
 
     return Tnodes[value]
   end
-end
-
-function isdestroyed(A::BDDNode)
-  return A.f_low==nothing || A.f_high==nothing
-end
-
-function destroy!(A::BDDNode)
-  if isdestroyed(A)
-    return
-  end
-
-  for father in A.f_low|A.f_high
-    destroy!(father)
-  end
-
-  A.f_low=nothing
-  A.f_high=nothing
 end
 
 function invert!(a::BDDTerminal,result_cache=Dict())
@@ -47,15 +40,19 @@ function ~(a::BDDNode)
 end
 
 function string(a::BDDTerminal)
-  return "$(a.value)"
+  if a.value
+    return "1"
+  else
+    return "0"
+  end
 end
 
 type BDDNonTerminal <: BDDNode
   var::ASCIIString
   low::BDDNode
   high::BDDNode
-  f_low::Set{BDDNode}
-  f_high::Set{BDDNode}
+  f_low::WeakKeyDict{BDDNode,Bool}
+  f_high::WeakKeyDict{BDDNode,Bool}
 
   function BDDNonTerminal(var::ASCIIString,low::BDDNode,high::BDDNode)
     if low===high
@@ -63,40 +60,25 @@ type BDDNonTerminal <: BDDNode
     end
 
     if length(high.f_high)>length(low.f_low)
-      nodeSet=low.f_low
+      nodeDict=low.f_low
       test=(node->node.high===high)
     else
-      nodeSet=high.f_high
+      nodeDict=high.f_high
       test=(node->node.low===low)
     end
 
-    for node in nodeSet
-      if typeof(node)==BDDNonTerminal && node.var==var && test(node)
+    for node in keys(nodeDict)
+      if node.var==var && test(node)
         return node
       end
     end
-    node=new(var,low,high,Set{BDDNode}(),Set{BDDNode}())
+    node=new(var,low,high,WeakKeyDict{BDDNode,Bool}(),WeakKeyDict{BDDNode,Bool}())
 
-    push!(high.f_high,node)
-    push!(low.f_low,node)
+    high.f_high[node]=true
+    low.f_low[node]=true
 
     return node
   end
-end
-
-function destroy!(A::BDDNonTerminal)
-  if isdestroyed(A)
-    return
-  end
-
-  for father in A.f_low|A.f_high
-    destroy!(father)
-  end
-
-  A.f_low=nothing
-  A.f_high=nothing
-
-  A.low.f_low
 end
 
 function invert!(a::BDDNonTerminal,result_cache=Dict())
@@ -144,7 +126,11 @@ show(io::IO, x::BDDNode) = show(io, "$(string(x))")
 
 ==(a::BDDNode,b::BDDNode) = (a === b)
 
-function BDD(value::Bool)
+==(a::BDDNode,b::BinBoolType) = (a === BDD(b))
+
+==(a::BinBoolType,b::BDDNode) = (BDD(a) === b)
+
+function BDD(value::BinBoolType)
   return BDDTerminal(value)
 end
 
@@ -189,10 +175,6 @@ function respect(bdd::BDDNode,O::Ordering)
 end
 
 function ancestors!(A::BDDNode,checked::Set{BDDNode})
-  if isdestroyed(A)
-    throw(ArgumentError("This BDDNode has been destroyed"))
-  end
-
   anc=Set{BDDNode}()
   stack=BDDNode[A]
 
@@ -202,7 +184,7 @@ function ancestors!(A::BDDNode,checked::Set{BDDNode})
     if !in(node,anc)&&!in(node,checked)
       push!(anc,node)
 
-      for father in union(node.f_low,node.f_high)
+      for father in union(keys(node.f_low),keys(node.f_high))
         push!(stack,father)
       end
     end
@@ -216,10 +198,6 @@ function ancestors(A::BDDNode)
 end
 
 function descendents!(A::BDDNode,checked)
-  if isdestroyed(A)
-    throw(ArgumentError("This BDDNode has been destroyed"))
-  end
-
   desc=Set{BDDNode}()
   to_visit=BDDNode[A]
 
@@ -241,23 +219,6 @@ end
 
 function descendents(A::BDDNode)
   return descendents!(A,Set{BDDNode}())
-end
-
-function BDDgarbagecollect(exceptions)
-  to_be_saved=Set{BDDNode}()
-
-  for node in exceptions
-    if typeof(node)==BDDNode
-      to_be_saved=union(to_be_saved,descendents(node,to_be_saved))
-    end
-  end
-
-  to_be_removed=ancestors(BDDNode(True),to_be_saved)
-  to_be_removed=ancestors(BDDNode(False),union(to_be_removed,to_be_saved))
-
-  for node in setdiff(to_be_removed,to_be_saved)
-    destroy!(node)
-  end
 end
 
 function variables(A::BDDNode)

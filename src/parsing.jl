@@ -1,4 +1,4 @@
-function parseboolexp(ordering::Ordering,value::Bool)
+function parseboolexp(ordering::Ordering,value::BinBoolType)
   return OBDD(ordering,value)
 end
 

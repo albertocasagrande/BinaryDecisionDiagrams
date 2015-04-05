@@ -4,13 +4,12 @@
 
 This package provides implementations for both Binary Decision Diagrams (BDD)
 and Ordered Binary Decision Diagrams (OBDD) [Bryant86]. These data structures
-are meant to represent Boolean functions. In particular, whenever the Boolean
+are meant to represent binary functions. In particular, whenever the binary  
 functions are stored as OBDD, it is possible to:
-* test logical equivalence between Boolean functions in time O(1)
+* test logical equivalence between binary functions in time O(1)
 * apply:
-  * logical negation of the formula f in time O(|f|)
-  * logical conjunction and exclusive disjunction of the formulae f1 and f2
-    in time O(|f1|+|f2|)
+  * bitwise negation of the formula f in time O(|f|)
+  * bitwise AND and OR of the functions f1 and f2 in time O(|f1|+|f2|)
 
 [Bryant86] Randal E. Bryant. "Graph-Based Algorithms for Boolean Function Manipulation".
            IEEE Transactions on Computers, C-35(8):677–691, 1986.
@@ -31,17 +30,17 @@ using BinaryDecisionDiagrams
 
 ### Binary Decision Diagrams
 
-Create a BDD terminal node by using the method `BDD` with a single Boolean
+Create a BDD terminal node by using the method `BDD` with a single binary  
 parameter  
 ```julia
-julia> b1=BDD(true)
-"true"
+julia> b1=BDD(1)
+"1"
 ```
 
 Create a non-terminal node by using the method `BDD` with three parameters:
 a variable name `var`, the BDD `low`, and the BDD `high`.  
 ```julia
-julia> b2=BDD("a",BDD(false),BDD(true))
+julia> b2=BDD("a",BDD(0),BDD(true))
 "a"
 
 julia> b3=BDD("b",BDD("c",b1,b1),b2)
@@ -50,7 +49,7 @@ julia> b3=BDD("b",BDD("c",b1,b1),b2)
 
 Partial evaluations of BDDs can be achieved through the method `restrict`.
 ```julia
-julia> restrict(b3,"b",true)
+julia> restrict(b3,"b",1)
 "a"
 
 julia> restrict(b3,"c",false)
@@ -105,7 +104,7 @@ ERROR: ArgumentError("(~b | (b & a)) does not respect (a,b)")
  in OBDD at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:10
 ```
 
-Whenever two OBDDs share the same variable ordering, Boolean
+Whenever two OBDDs share the same variable ordering, bitwise 
 negation, conjunction, and disjunction can be applied to them as follows.
 ```julia
 julia> o1&o2
@@ -117,7 +116,7 @@ julia> o4=(o1|~o2)&o3
 
 Partial evaluations and logic equivalence are also available.
 ```julia
-julia> restrict(o4,"b",true)
+julia> restrict(o4,"b",1)
 "(a,b,c)->(a & c)"
 
 julia> b==OBDD("(a,b,c)->a&c&(b|~b)")

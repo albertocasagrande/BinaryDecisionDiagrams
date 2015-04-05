@@ -54,30 +54,6 @@ function ~(A::OBDD)
   return OBDD(A.ordering,~A.root)
 end
 
-function (&)(a::Bool,B::OBDD)
-  return BDD(a)&B
-end
-
-function (&)(A::OBDD,b::Bool)
-  return A&BDD(b)
-end
-
-function (|)(a::Bool,B::OBDD)
-  return BDD(a)|B
-end
-
-function (|)(A::OBDD,b::Bool)
-  return A|BDD(b)
-end
-
-function (|)(A::OBDD,B::OBDD)
-  if A.ordering!=B.ordering
-    throw(ArgumentError("$(A) and $(B) do not share the same ordering"))
-  end
-
-  return OBDD(A.ordering,applyoperator(((v1,v2)->v1|v2),A.root,B.root,A.ordering))
-end
-
 function (&)(A::OBDD,B::OBDD)
   if A.ordering!=B.ordering
     throw(ArgumentError("$(A) and $(B) do not share the same ordering"))
@@ -86,6 +62,22 @@ function (&)(A::OBDD,B::OBDD)
   return OBDD(A.ordering,applyoperator(((v1,v2)->v1&v2),A.root,B.root,A.ordering))
 end
 
+function (&)(a::BinBoolType,B::OBDD)
+  return BDD(a)&B
+end
+
+function (&)(A::OBDD,b::BinBoolType)
+  return A&BDD(b)
+end
+
+function (&)(A::OBDD,B::BDDNode)
+  return A&OBDD(A.ordering,B)
+end
+
+function (&)(A::BDDNode,B::OBDD)
+  return OBDD(B.ordering,A)&B
+end
+
 function (|)(A::OBDD,B::OBDD)
   if A.ordering!=B.ordering
     throw(ArgumentError("$(A) and $(B) do not share the same ordering"))
@@ -94,16 +86,17 @@ function (|)(A::OBDD,B::OBDD)
   return OBDD(A.ordering,applyoperator(((v1,v2)->v1|v2),A.root,B.root,A.ordering))
 end
 
-function (&)(A::OBDD,B::BDDNode)
-  return A&OBDD(A.ordering,B)
+
+function (|)(a::BinBoolType,B::OBDD)
+  return BDD(a)|B
+end
+
+function (|)(A::OBDD,b::BinBoolType)
+  return A|BDD(b)
 end
 
 function (|)(A::OBDD,B::BDDNode)
   return A|OBDD(A.ordering,B)
-end
-
-function (&)(A::BDDNode,B::OBDD)
-  return OBDD(B.ordering,A)&B
 end
 
 function (|)(A::BDDNode,B::OBDD)
@@ -116,6 +109,22 @@ function ==(A::OBDD,B::OBDD)
   end
 
   return A.root == B.root
+end
+
+function ==(A::OBDD,b::BDDNode)
+  return A.root == b
+end
+
+function ==(a::BDDNode,B::OBDD)
+  return a == B.root
+end
+
+function ==(A::OBDD,b::BinBoolType)
+  return A.root == BDD(b)
+end
+
+function ==(a::BinBoolType,B::OBDD)
+  return B.root == BDD(a)
 end
 
 function restrict(A::OBDD,var::ASCIIString,value)

@@ -19,7 +19,23 @@ ordering=["c","b","a"]
 
 oa=OBDD(ordering,c)
 ob=OBDD(ordering,d)
-oc=OBDD("(c,b,a)-> (~(c|true) || !true) | (true&(b|a))")
+oc=OBDD("(c,b,a)-> (~(c|true) || !1) | (true&(b|a))")
+
+BDDnodes=(()->Set(["$(node)" for node in union(ancestors(BDD(0)),ancestors(BDD(1)))]))
+
+gc()
+before_od=BDDnodes()
+
+od=OBDD(["d","c","b","a"],BDD("d",c,d))
+with_od=BDDnodes()
+
+od=nothing
+gc()
+after_od=BDDnodes()
+
+@test before_od == after_od
+@test before_od != with_od
+@test issubset(before_od,with_od)
 
 @test oc == OBDD(ordering,"b|a")
 @test OBDD(string(oa)) == oa
