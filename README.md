@@ -30,8 +30,7 @@ using BinaryDecisionDiagrams
 
 ### Binary Decision Diagrams
 
-Create a BDD terminal node by using the method `BDD` with a single binary  
-parameter  
+Create a BDD terminal node by using the method `BDD` with a single binary parameter  
 ```julia
 julia> b1=BDD(1)
 "1"
@@ -119,9 +118,9 @@ Partial evaluations and logic equivalence are also available.
 julia> restrict(o4,"b",1)
 "(a,b,c)->(a & c)"
 
-julia> b==OBDD("(a,b,c)->a&c&(b|~b)")
+julia> o3==OBDD("(a,b,c)->a&c&(b|~b)")
 false
 
-julia> a&b==OBDD("(a,b,c)->a&~b&(c|~c)")
+julia> o2&o3==OBDD("(a,b,c)->a&~b&(c|~c)")
 true
 ```
