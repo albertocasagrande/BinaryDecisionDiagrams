@@ -1,4 +1,4 @@
-The BinaryDecisionDiagrams.jl package is licensed under the MIT "Expat" License:
+The BinaryDecisionDiagrams package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2015: Alberto Casagrande.
 >

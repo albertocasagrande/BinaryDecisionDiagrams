@@ -1,9 +1,10 @@
 # BinaryDecisionDiagrams
 
 [![Build Status](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams.svg?branch=master)](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams)
+[ ![License] [license-image] ] [license]
 
 This package provides implementations for both Binary Decision Diagrams (BDD)
-and Ordered Binary Decision Diagrams (OBDD) [Bryant86]_. These data structures
+and Ordered Binary Decision Diagrams (OBDD) [Bryant86]. These data structures
 are meant to represent binary functions.
 
 ## Theory
@@ -44,13 +45,13 @@ OBDDs are BDDs equipped of a variable ordering and satisfying condition 2. and 3
 
 Whenever two binary functions `f_1` and `f_2` are stored as OBDD and they share
 the same variable ordering, it is possible to:
-* test logical equivalence between `f_1` and `f_2` in time O(1);
+* test logical equivalence between `f_1` and `f_2` in time `O(1)`;
 * compute the OBDD that represents:
-  * the bitwise negation of the formula `f_1` in time O(|f_1|);
-  * the bitwise binary combinations of the functions `f_1` and `f_2` in time O(|f_1|+|f_2|).
+  * the bitwise negation of the formula `f_1` in time `O(|f_1|)`;
+  * the bitwise binary combinations of the functions `f_1` and `f_2` in time `O(|f_1|+|f_2|)``.
 
-.. [Bryant86] Randal E. Bryant. "Graph-Based Algorithms for Boolean Function Manipulation".
-              IEEE Transactions on Computers, C-35(8):677–691, 1986.
+[Bryant86] Randal E. Bryant. "Graph-Based Algorithms for Boolean Function Manipulation".
+           IEEE Transactions on Computers, C-35(8):677–691, 1986.
 
 [digraph]: https://en.wikipedia.org/wiki/Directed_graph
 
@@ -164,3 +165,6 @@ false
 julia> o2&o3==OBDD("(a,b,c)->a&~b&(c|~c)")
 true
 ```
+
+[license-image]: https://img.shields.io/:license-mit-blue.svg
+[license]: https://github.com/albertocasagrande/BinaryDecisionDiagrams/blob/master/LICENSE.md
