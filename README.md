@@ -33,20 +33,21 @@ for all non-terminal nodes `n` and `n.high`.
 
 The logical equivalence of two binary functions can be reduced to the
 existence of an isomorphism between the BDD encoding them under three conditions:
-1. the two BDDs respect the same variable ordering
+
+1. the two BDDs respect the same variable ordering;
 2. `n.low` and `n.high` are different nodes for any non-terminal node `n` in
-   both the BDDs
-3. for each of the BDDs and for all pairs of nodes in it, there is
-   no isomophism between them.
+   both the BDDs;
+3. for each of the BDDs and for all pairs of nodes in it, there is no
+   isomophism between them.
 
 OBDDs are BDDs equipped of a variable ordering and satisfying condition 2. and 3.
 
 Whenever two binary functions `f_1` and `f_2` are stored as OBDD and they share
 the same variable ordering, it is possible to:
-* test logical equivalence between `f_1` and `f_2` in time O(1)
+* test logical equivalence between `f_1` and `f_2` in time O(1);
 * compute the OBDD that represents:
-  * the bitwise negation of the formula `f_1` in time O(|f_1|)
-  * the bitwise binary combinations of the functions `f_1` and `f_2` in time O(|f_1|+|f_2|)
+  * the bitwise negation of the formula `f_1` in time O(|f_1|);
+  * the bitwise binary combinations of the functions `f_1` and `f_2` in time O(|f_1|+|f_2|).
 
 .. [Bryant86] Randal E. Bryant. "Graph-Based Algorithms for Boolean Function Manipulation".
               IEEE Transactions on Computers, C-35(8):677–691, 1986.
