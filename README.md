@@ -3,13 +3,13 @@
 [![Build Status](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams.svg?branch=master)](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams)
 [ ![License] [license-image] ] [license]
 
-This package provides implementations for both [Binary Decision Diagrams (BDD)
-and Ordered Binary Decision Diagrams (OBDD)](Bryant86). These data structures
+This package provides implementations for both Binary Decision Diagrams (BDD)
+and Ordered Binary Decision Diagrams (OBDD) [[Bryant86]](#References). These data structures
 are meant to represent binary/Boolean functions.
 
 ## Theory
 
-Both BDD and OBDD are [directed graphs][digraph]
+Both BDD and OBDD are [directed graphs][digraph].
 
 ### Binary Decision Diagrams
 
@@ -41,7 +41,7 @@ existence of an isomorphism between the BDD encoding them under three conditions
 3. for each of the BDDs and for all pairs of nodes in it, there is no
    isomophism between them.
 
-OBDDs are BDDs equipped of a variable ordering and satisfying condition 2. and 3.
+OBDDs are BDDs equipped of a variable ordering and satisfying condition 2 and 3.
 
 Whenever two binary functions `f_1` and `f_2` are stored as OBDD and they share
 the same variable ordering, it is possible to:
@@ -50,7 +50,8 @@ the same variable ordering, it is possible to:
   * the bitwise negation of the formula `f_1` in time `O(|f_1|)`;
   * the bitwise binary combinations of the functions `f_1` and `f_2` in time `O(|f_1|+|f_2|)`.
 
-<a name="Bryant86">[Bryant86] Randal E. Bryant. "Graph-Based Algorithms for Boolean Function Manipulation".
+### References
+[Bryant86] Randal E. Bryant. "Graph-Based Algorithms for Boolean Function Manipulation".
            IEEE Transactions on Computers, C-35(8):677–691, 1986.
 
 [digraph]: https://en.wikipedia.org/wiki/Directed_graph
@@ -197,8 +198,6 @@ ERROR: ArgumentError("(b,a)->(~b | (b & a)) and (c)->(~c) do not share the same 
  in & at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:113
 ```
 
-#### Dynamic
-
 In order to either compare or pass as arguments to a bitwise binary functions
 two OBDDs that do not share the same variable ordering, we can enable
 the *dynamic variable ordering*. In such case, two new OBDDs, having a common
@@ -237,29 +236,7 @@ ERROR: ArgumentError("(b,a)->(~b | (b & a)) and (a,b)->((~a & ~b) | a) do not sh
 
 ## Copyright and License
 
-The BinaryDecisionDiagrams package is licensed under the MIT "Expat" License:
-
-> Copyright (c) 2015: Alberto Casagrande.
->
-> Permission is hereby granted, free of charge, to any person obtaining
-> a copy of this software and associated documentation files (the
-> "Software"), to deal in the Software without restriction, including
-> without limitation the rights to use, copy, modify, merge, publish,
-> distribute, sublicense, and/or sell copies of the Software, and to
-> permit persons to whom the Software is furnished to do so, subject to
-> the following conditions:
->
-> The above copyright notice and this permission notice shall be
-> included in all copies or substantial portions of the Software.
->
-> THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-> EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-> MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
-> IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
-> CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
-> TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
-> SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
+The BinaryDecisionDiagrams package is licensed under the [MIT "Expat" License] [license]
 
 [license-image]: https://img.shields.io/:license-mit-blue.svg
 [license]: https://github.com/albertocasagrande/BinaryDecisionDiagrams/blob/master/LICENSE.md
