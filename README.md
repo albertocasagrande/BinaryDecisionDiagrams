@@ -4,7 +4,7 @@
 [ ![License] [license-image] ] [license]
 
 This package provides implementations for both Binary Decision Diagrams (BDD)
-and Ordered Binary Decision Diagrams (OBDD) [[Bryant86]](#References). These data structures
+and Ordered Binary Decision Diagrams (OBDD) [[Bryant86]](http://dx.doi.org/10.1109/TC.1986.1676819). These data structures
 are meant to represent binary/Boolean functions.
 
 ## Theory
@@ -48,11 +48,7 @@ the same variable ordering, it is possible to:
 * test logical equivalence between `f_1` and `f_2` in time `O(1)`;
 * compute the OBDD that represents:
   * the bitwise negation of the formula `f_1` in time `O(|f_1|)`;
-  * the bitwise binary combinations of the functions `f_1` and `f_2` in time `O(|f_1|+|f_2|)`.
-
-### References
-[Bryant86] Randal E. Bryant. "Graph-Based Algorithms for Boolean Function Manipulation".
-           IEEE Transactions on Computers, C-35(8):677–691, 1986.
+  * the bitwise binary combinations of the functions `f_1` and `f_2` in time `O(|f_1|*|f_2|)`.
 
 [digraph]: https://en.wikipedia.org/wiki/Directed_graph
 
