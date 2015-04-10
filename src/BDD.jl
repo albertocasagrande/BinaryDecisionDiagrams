@@ -139,6 +139,8 @@ function BDD(var::ASCIIString,low::BDDNode,high::BDDNode)
 end
 
 function respect!(bdd::BDDNode,O::Ordering,checked::Set)
+  global dynamicOBDDordering
+
   if in(bdd,checked)
     return true
   end
@@ -151,7 +153,11 @@ function respect!(bdd::BDDNode,O::Ordering,checked::Set)
 
   if typeof(bdd)==BDDNonTerminal
     if !in(bdd.var,O)
-      throw(ArgumentError("$(bdd.var) is not in $(O)"))
+      if dynamicOBDDordering
+
+      else
+        throw(ArgumentError("$(bdd.var) is not in $(O)"))
+      end
     end
 
     for son in BDDNode[bdd.low,bdd.high]
@@ -222,7 +228,7 @@ function descendents(A::BDDNode)
 end
 
 function variables(A::BDDNode)
-  vars=Set{String}()
+  vars=Set{ASCIIString}()
   for node in descendents(A)
     if typeof(node)==BDDNonTerminal
       push!(vars,node.var)
@@ -232,7 +238,7 @@ function variables(A::BDDNode)
   return vars
 end
 
-function applyoperator!(operator,A::BDDNode,B::BDDNode,O::Ordering,result_cache::Dict)
+function applyoperator!(operator::Function,A::BDDNode,B::BDDNode,O::Ordering,result_cache::Dict)
   if !haskey(result_cache,A)
     result_cache[A]=Dict()
   end
@@ -246,11 +252,11 @@ function applyoperator!(operator,A::BDDNode,B::BDDNode,O::Ordering,result_cache:
   return result_cache[A][B]
 end
 
-function applyoperator(operator,A::BDDNode,B::BDDNode,O::Ordering)
+function applyoperator(operator::Function,A::BDDNode,B::BDDNode,O::Ordering)
   return applyoperator!(operator,A,B,O,Dict())
 end
 
-function compute!(operator,A::BDDNode,B::BDDNode, O::Ordering,result_cache::Dict)
+function compute!(operator::Function,A::BDDNode,B::BDDNode, O::Ordering,result_cache::Dict)
   if typeof(A)==BDDTerminal
     if typeof(B)==BDDTerminal
       return BDD(operator(A.value,B.value))
@@ -282,7 +288,7 @@ function compute!(operator,A::BDDNode,B::BDDNode, O::Ordering,result_cache::Dict
   throw(ArgumentError("Unsupported configuration $(A) $(B)"))
 end
 
-function compute(operator,A::BDDNode,B::BDDNode, O::Ordering)
+function compute(operator::Function,A::BDDNode,B::BDDNode, O::Ordering)
   return compute!(operator,A,B,O,Dict())
 end
 

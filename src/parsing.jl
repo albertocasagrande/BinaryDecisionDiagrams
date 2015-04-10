@@ -1,8 +1,8 @@
-function parseboolexp(ordering::Ordering,value::BinBoolType)
+function parsebinaryexp(ordering::Ordering,value::BinBoolType)
   return OBDD(ordering,value)
 end
 
-function parseboolexp(ordering::Ordering,var::Symbol)
+function parsebinaryexp(ordering::Ordering,var::Symbol)
   return OBDD(ordering,BDD(string(var),BDD(false),BDD(true)))
 end
 
@@ -14,80 +14,111 @@ function parseordering(ordering::Expr)
   return ListOrdering(ASCIIString[string(var) for var in ordering.args])
 end
 
-function parseboolexp(ordering::Ordering,boolexp::Expr)
-  if boolexp.head == :&&
-    return parseboolexp(ordering,boolexp.args[1])&parseboolexp(ordering,boolexp.args[1])
+function parsebinaryexp(ordering::Ordering,binaryexp::Expr)
+  if binaryexp.head == :&&
+    return parsebinaryexp(ordering,binaryexp.args[1])&parsebinaryexp(ordering,binaryexp.args[1])
   end
 
-  if boolexp.head == :||
-    return parseboolexp(ordering,boolexp.args[1])&parseboolexp(ordering,boolexp.args[1])
+  if binaryexp.head == :||
+    return parsebinaryexp(ordering,binaryexp.args[1])&parsebinaryexp(ordering,binaryexp.args[1])
   end
 
-  if boolexp.head != :call
-    throw(ParseError("expected a boolean operator, got $(boolexp.head)"))
+  if binaryexp.head != :call
+    throw(ParseError("expected a bitwise binary operator, got $(binaryexp.head)"))
   end
 
-  if boolexp.args[1] == :~ || boolexp.args[1] == :!
-    return ~parseboolexp(ordering,boolexp.args[2])
+  if binaryexp.args[1] == :~ || binaryexp.args[1] == :!
+    return ~parsebinaryexp(ordering,binaryexp.args[2])
   end
 
-  if boolexp.args[1] == :&
-    return parseboolexp(ordering,boolexp.args[2])&parseboolexp(ordering,boolexp.args[3])
+  if binaryexp.args[1] == :&
+    return parsebinaryexp(ordering,binaryexp.args[2])&parsebinaryexp(ordering,binaryexp.args[3])
   end
 
-  if boolexp.args[1] == :|
-    return parseboolexp(ordering,boolexp.args[2])|parseboolexp(ordering,boolexp.args[3])
+  if binaryexp.args[1] == :|
+    return parsebinaryexp(ordering,binaryexp.args[2])|parsebinaryexp(ordering,binaryexp.args[3])
   end
 
-  throw(ParseError("unknown boolean operator $(boolexp.args[1])"))
+  if binaryexp.args[1] == :$
+    return parsebinaryexp(ordering,binaryexp.args[2]) $ parsebinaryexp(ordering,binaryexp.args[3])
+  end
+
+  throw(ParseError("unknown bitwise binary operator $(binaryexp.args[1])"))
 end
 
-function parseboolfunct(boolfunct::Expr)
-  if boolfunct.head == :->
-    O=parseordering(boolfunct.args[1])
+function parsebinaryfunct(binaryfunct::Expr)
+  if binaryfunct.head == :->
+    O=parseordering(binaryfunct.args[1])
 
     #if ordering!=nothing && ordering != O
     #  throw(ArgumentError("the parsed order $(O) and the passed order $(ordering) are not the same"))
     #end
 
-    return parseboolexp(O,boolfunct.args[2].args[2])
+    return parsebinaryexp(O,binaryfunct.args[2].args[2])
   end
 
-  throw(ParseError("unknown boolean function $(boolfunct)"))
+  throw(ParseError("unknown bitwise binary function $(binaryfunct)"))
 end
 
-function OBDD(ordering::Ordering,boolexpstr::ASCIIString)
+function OBDD(ordering::Ordering,binaryexpstr::ASCIIString)
   try
-    boolexp=parse(boolexpstr)
+    binaryexp=parse(binaryexpstr)
 
-    return parseboolexp(ordering,boolexp)
+    return parsebinaryexp(ordering,binaryexp)
   catch e
     throw(typeof(e)(e.msg))
   end
 end
 
-function OBDD(ordering::Array{ASCIIString,1},boolexpstr::ASCIIString)
+function OBDD(ordering::Array{ASCIIString,1},binaryexpstr::ASCIIString)
   try
-    return OBDD(ListOrdering(ordering),boolexpstr)
+    return OBDD(ListOrdering(ordering),binaryexpstr)
   catch e
     throw(typeof(e)(e.msg))
   end
 end
 
-function OBDD(ordering::Array{Char,1},boolexpstr::ASCIIString)
+function OBDD(ordering::Array{Char,1},binaryexpstr::ASCIIString)
   try
-    return OBDD(ListOrdering(ordering),boolexpstr)
+    return OBDD(ListOrdering(ordering),binaryexpstr)
   catch e
     throw(typeof(e)(e.msg))
   end
 end
 
-function OBDD(boolfunctstr::ASCIIString)
+function OBDD(binaryfunctstr::ASCIIString)
   try
-    boolfunct=parse(boolfunctstr)
+    binaryfunct=parse(binaryfunctstr)
 
-    return parseboolfunct(boolfunct)
+    return parsebinaryfunct(binaryfunct)
   catch e
     throw(typeof(e)(e.msg))
   end
+end
+
+function changeordering(A::OBDD,O::Ordering)
+  return OBDD(O,string(A.root))
+end
+
+function changeordering(A::OBDD,O::Array{ASCIIString,1})
+  return changeordering(A,ListOrdering(O))
+end
+
+function changeordering(A::OBDD,O::Array{Char,1})
+  return changeordering(A,ListOrdering(O))
+end
+
+function changeordering!(A::OBDD,O::Ordering)
+  A.root=OBDD(O,string(A.root)).root
+  A.ordering=O
+
+  return A
+end
+
+function changeordering!(A::OBDD,O::Array{ASCIIString,1})
+  return changeordering!(A,ListOrdering(O))
+end
+
+function changeordering!(A::OBDD,O::Array{Char,1})
+  return changeordering!(A,ListOrdering(O))
 end
