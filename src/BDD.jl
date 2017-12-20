@@ -1,13 +1,12 @@
-abstract BDDNode
+abstract type BDDNode end
 
-BinBoolType = Union(Integer,Bool)
+const BinBoolType = Union{Integer,Bool}
 
 type BDDTerminal <: BDDNode
   value::Bool
   f_low::WeakKeyDict{BDDNode,Bool}
   f_high::WeakKeyDict{BDDNode,Bool}
 
-  Tnodes::Dict{Bool,BDDTerminal} = Dict()
   function BDDTerminal(value::BinBoolType)
     if value==0 || value==false
       value=false
@@ -25,8 +24,10 @@ type BDDTerminal <: BDDNode
   end
 end
 
+const Tnodes = Dict{Bool,BDDTerminal}()
+
 function invert!(a::BDDTerminal,result_cache=Dict())
-  if a in result_cache
+  if a in keys(result_cache)
     return result_cache[a]
   end
 
@@ -48,13 +49,13 @@ function string(a::BDDTerminal)
 end
 
 type BDDNonTerminal <: BDDNode
-  var::ASCIIString
+  var::String
   low::BDDNode
   high::BDDNode
   f_low::WeakKeyDict{BDDNode,Bool}
   f_high::WeakKeyDict{BDDNode,Bool}
 
-  function BDDNonTerminal(var::ASCIIString,low::BDDNode,high::BDDNode)
+  function BDDNonTerminal(var::String,low::BDDNode,high::BDDNode)
     if low===high
       return low
     end
@@ -94,7 +95,7 @@ function invert!(a::BDDNonTerminal,result_cache=Dict())
 end
 
 function string(a::BDDNonTerminal)
-  repr=ASCIIString[]
+  repr=String[]
 
   if typeof(a.low)==BDDTerminal
     if a.low.value
@@ -134,7 +135,7 @@ function BDD(value::BinBoolType)
   return BDDTerminal(value)
 end
 
-function BDD(var::ASCIIString,low::BDDNode,high::BDDNode)
+function BDD(var::String,low::BDDNode,high::BDDNode)
   return BDDNonTerminal(var,low,high)
 end
 
@@ -228,7 +229,7 @@ function descendents(A::BDDNode)
 end
 
 function variables(A::BDDNode)
-  vars=Set{ASCIIString}()
+  vars=Set{String}()
   for node in descendents(A)
     if typeof(node)==BDDNonTerminal
       push!(vars,node.var)
@@ -292,7 +293,7 @@ function compute(operator::Function,A::BDDNode,B::BDDNode, O::Ordering)
   return compute!(operator,A,B,O,Dict())
 end
 
-function restrict(A::BDDNode,var::ASCIIString,value::Integer)
+function restrict(A::BDDNode,var::String,value::Integer)
   if value==0
     return restrict(A,var,false)
   end
@@ -304,7 +305,7 @@ function restrict(A::BDDNode,var::ASCIIString,value::Integer)
   throw(ArgumentError("expected a binary value, got $(value)"))
 end
 
-function restrict!(A::BDDNode,var::ASCIIString,value::Bool,result_cache::Dict)
+function restrict!(A::BDDNode,var::String,value::Bool,result_cache::Dict)
   if haskey(result_cache,A)
     return result_cache[A]
   end
@@ -314,11 +315,11 @@ function restrict!(A::BDDNode,var::ASCIIString,value::Bool,result_cache::Dict)
   return result_cache[A]
 end
 
-function restrict(A::BDDNode,var::ASCIIString,value::Bool)
+function restrict(A::BDDNode,var::String,value::Bool)
   return restrict!(A,var,value,Dict())
 end
 
-function computerestriction!(A::BDDNode,var::ASCIIString,value::Bool,result_cache::Dict)
+function computerestriction!(A::BDDNode,var::String,value::Bool,result_cache::Dict)
   if typeof(A)==BDDTerminal
     return A
   end

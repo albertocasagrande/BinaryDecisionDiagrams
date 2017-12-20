@@ -2,7 +2,7 @@ type OBDD
   ordering::Ordering
   root::BDDNode
 
-  function OBDD(ordering::Array{ASCIIString,1},bdd::BDDNode)
+  function OBDD(ordering::Array{String,1},bdd::BDDNode)
     try
       O=ListOrdering(ordering)
       return OBDD(O,bdd)
@@ -149,24 +149,24 @@ function (|)(A::BDDNode,B::OBDD)
   return OBDD(B.ordering,A)|B
 end
 
-function ($)(A::OBDD,B::OBDD)
-  return applyoperator(((v1,v2)->v1 $ v2),A,B)
+function Base.xor(A::OBDD,B::OBDD)
+  return applyoperator(((v1,v2)->v1 ⊻ v2),A,B)
 end
 
-function ($)(a::BinBoolType,B::OBDD)
-  return BDD(a) $ B
+function Base.xor(a::BinBoolType,B::OBDD)
+  return BDD(a) ⊻ B
 end
 
-function ($)(A::OBDD,b::BinBoolType)
-  return A $ BDD(b)
+function Base.xor(A::OBDD,b::BinBoolType)
+  return A ⊻ BDD(b)
 end
 
-function ($)(A::OBDD,B::BDDNode)
-  return A$OBDD(A.ordering,B)
+function Base.xor(A::OBDD,B::BDDNode)
+  return A ⊻ OBDD(A.ordering,B)
 end
 
-function ($)(A::BDDNode,B::OBDD)
-  return OBDD(B.ordering,A) $ B
+function Base.xor(A::BDDNode,B::OBDD)
+  return OBDD(B.ordering,A) ⊻ B
 end
 
 function ==(A::OBDD,B::OBDD)
@@ -199,7 +199,7 @@ function ==(a::BinBoolType,B::OBDD)
   return B.root == BDD(a)
 end
 
-function restrict(A::OBDD,var::ASCIIString,value)
+function restrict(A::OBDD,var::String,value)
   root=restrict(A.root,var,value)
   return OBDD(A.ordering,root)
 end

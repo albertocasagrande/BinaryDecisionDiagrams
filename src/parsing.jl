@@ -11,7 +11,7 @@ function parseordering(ordering::Expr)
     throw(ParseError("expected a tuple, got $(ordering)"))
   end
 
-  return ListOrdering(ASCIIString[string(var) for var in ordering.args])
+  return ListOrdering(String[string(var) for var in ordering.args])
 end
 
 function parsebinaryexp(ordering::Ordering,binaryexp::Expr)
@@ -60,47 +60,31 @@ function parsebinaryfunct(binaryfunct::Expr)
   throw(ParseError("unknown bitwise binary function $(binaryfunct)"))
 end
 
-function OBDD(ordering::Ordering,binaryexpstr::ASCIIString)
-  try
-    binaryexp=parse(binaryexpstr)
+function OBDD(ordering::Ordering,binaryexpstr::String)
+  binaryexp=parse(binaryexpstr)
 
-    return parsebinaryexp(ordering,binaryexp)
-  catch e
-    throw(typeof(e)(e.msg))
-  end
+  return parsebinaryexp(ordering,binaryexp)
 end
 
-function OBDD(ordering::Array{ASCIIString,1},binaryexpstr::ASCIIString)
-  try
-    return OBDD(ListOrdering(ordering),binaryexpstr)
-  catch e
-    throw(typeof(e)(e.msg))
-  end
+function OBDD(ordering::Array{String,1},binaryexpstr::String)
+  return OBDD(ListOrdering(ordering),binaryexpstr)
 end
 
-function OBDD(ordering::Array{Char,1},binaryexpstr::ASCIIString)
-  try
-    return OBDD(ListOrdering(ordering),binaryexpstr)
-  catch e
-    throw(typeof(e)(e.msg))
-  end
+function OBDD(ordering::Array{Char,1},binaryexpstr::String)
+  return OBDD(ListOrdering(ordering),binaryexpstr)
 end
 
-function OBDD(binaryfunctstr::ASCIIString)
-  try
-    binaryfunct=parse(binaryfunctstr)
+function OBDD(binaryfunctstr::String)
+  binaryfunct=parse(binaryfunctstr)
 
-    return parsebinaryfunct(binaryfunct)
-  catch e
-    throw(typeof(e)(e.msg))
-  end
+  return parsebinaryfunct(binaryfunct)
 end
 
 function changeordering(A::OBDD,O::Ordering)
   return OBDD(O,string(A.root))
 end
 
-function changeordering(A::OBDD,O::Array{ASCIIString,1})
+function changeordering(A::OBDD,O::Array{String,1})
   return changeordering(A,ListOrdering(O))
 end
 
@@ -115,7 +99,7 @@ function changeordering!(A::OBDD,O::Ordering)
   return A
 end
 
-function changeordering!(A::OBDD,O::Array{ASCIIString,1})
+function changeordering!(A::OBDD,O::Array{String,1})
   return changeordering!(A,ListOrdering(O))
 end
 
