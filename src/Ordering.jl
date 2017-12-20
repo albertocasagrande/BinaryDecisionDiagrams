@@ -1,10 +1,10 @@
-abstract Ordering
+abstract type Ordering end
 
-type ListOrdering <: Ordering
+mutable struct ListOrdering <: Ordering
   ordering::Dict
   length::Integer
 
-  function ListOrdering(ordering::Array{ASCIIString,1})
+  function ListOrdering(ordering::Vector{String})
     O=Dict()
     i=1
     for var in ordering
@@ -19,7 +19,7 @@ type ListOrdering <: Ordering
   end
 
   function ListOrdering(ordering::Array{Char,1};dynamic=false)
-    varnames=ASCIIString[]
+    varnames=String[]
 
     for char in ordering
       push!(varnames,string(char))
@@ -47,7 +47,7 @@ function set_static_ordering()
   return "Dynamic variable ordering has been disabled"
 end
 
-function addgreatest!(O::ListOrdering,var::ASCIIString)
+function addgreatest!(O::ListOrdering,var::String)
   global dynamicOBDDordering
 
   if !dynamicOBDDordering
@@ -62,23 +62,23 @@ function addgreatest!(O::ListOrdering,var::ASCIIString)
   O.ordering[var]=O.length
 end
 
-function convert(::Type{Array{ASCIIString,1}},O::ListOrdering)
-  return sort!(ASCIIString[key for key in keys(O.ordering)],lt=((a,b)->inorder(O,a,b)))
+function convert(::Type{Array{String,1}},O::ListOrdering)
+  return sort!(String[key for key in keys(O.ordering)],lt=((a,b)->inorder(O,a,b)))
 end
 
 function variablesin(O::ListOrdering)
-  return Set{ASCIIString}(keys(O.ordering))
+  return Set{String}(keys(O.ordering))
 end
 
-function in(var::ASCIIString,O::ListOrdering)
+function in(var::String,O::ListOrdering)
   return haskey(O.ordering,var)
 end
 
-function haskey(O::ListOrdering,a::ASCIIString)
+function haskey(O::ListOrdering,a::String)
   return haskey(O.ordering,a)
 end
 
-function inorder(O::ListOrdering,a::ASCIIString,b::ASCIIString)
+function inorder(O::ListOrdering,a::String,b::String)
   for var in [a,b]
     if !haskey(O,var)
       throw(ArgumentError("$(var) is not in $(O)"))
@@ -99,14 +99,14 @@ end
 function string(A::ListOrdering)
   str="("
   sep=""
-  for var in convert(Array{ASCIIString,1},A)
+  for var in convert(Array{String,1},A)
     str=string(str,sep,var)
     sep=","
   end
   return string(str,")")
 end
 
-function definedfor(A::ListOrdering, B::Set{ASCIIString})
+function definedfor(A::ListOrdering, B::Set{String})
   try
     for var in B
       if !in(var,A)
@@ -124,10 +124,10 @@ function merge(A::ListOrdering, B::ListOrdering)
   #this should be replaced by a topological sort on the
   #ordering graph.
 
-  ordering=convert(Array{ASCIIString,1},A)
+  ordering=convert(Array{String,1},A)
 
   BnotinA=setdiff(variablesin(B),variablesin(A))
-  for var in convert(Array{ASCIIString,1},B)
+  for var in convert(Array{String,1},B)
     if var in BnotinA
       push!(ordering,var)
     end
