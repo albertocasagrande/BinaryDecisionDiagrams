@@ -1,7 +1,7 @@
 # BinaryDecisionDiagrams
 
 [![Build Status](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams.svg?branch=master)](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams)
-[ ![License] [license-image] ] [license]
+[![License][license-image]][license]
 
 This [Julia](http://julialang.org/) package provides implementations for both Binary Decision Diagrams (BDD)
 and Ordered Binary Decision Diagrams (OBDD) [[Bryant86]](http://dx.doi.org/10.1109/TC.1986.1676819). These data structures
