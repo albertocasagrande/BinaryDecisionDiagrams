@@ -1,7 +1,7 @@
 # BinaryDecisionDiagrams
 
 [![Build Status](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams.svg?branch=master)](https://travis-ci.org/albertocasagrande/BinaryDecisionDiagrams)
-[ ![License] [license-image] ] [license]
+![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)
 
 This [Julia](http://julialang.org/) package provides implementations for both Binary Decision Diagrams (BDD)
 and Ordered Binary Decision Diagrams (OBDD) [[Bryant86]](http://dx.doi.org/10.1109/TC.1986.1676819). These data structures
@@ -232,7 +232,7 @@ ERROR: ArgumentError("(b,a)->(~b | (b & a)) and (a,b)->((~a & ~b) | a) do not sh
 
 ## Copyright and License
 
-The BinaryDecisionDiagrams package is licensed under the [MIT "Expat" License] [license]
+The BinaryDecisionDiagrams package is licensed under the [MIT "Expat" License][license]
 
 [license-image]: https://img.shields.io/:license-mit-blue.svg
 [license]: https://github.com/albertocasagrande/BinaryDecisionDiagrams/blob/master/LICENSE.md
