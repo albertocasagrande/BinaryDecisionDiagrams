@@ -1,4 +1,4 @@
-type OBDD
+struct OBDD
   ordering::Ordering
   root::BDDNode
 

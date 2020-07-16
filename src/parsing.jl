@@ -8,7 +8,7 @@ end
 
 function parseordering(ordering::Expr)
   if ordering.head != :tuple
-    throw(ParseError("expected a tuple, got $(ordering)"))
+    throw(Meta.ParseError("expected a tuple, got $(ordering)"))
   end
 
   return ListOrdering(String[string(var) for var in ordering.args])
@@ -24,7 +24,7 @@ function parsebinaryexp(ordering::Ordering,binaryexp::Expr)
   end
 
   if binaryexp.head != :call
-    throw(ParseError("expected a bitwise binary operator, got $(binaryexp.head)"))
+    throw(Meta.ParseError("expected a bitwise binary operator, got $(binaryexp.head)"))
   end
 
   if binaryexp.args[1] == :~ || binaryexp.args[1] == :!
@@ -43,7 +43,7 @@ function parsebinaryexp(ordering::Ordering,binaryexp::Expr)
     return parsebinaryexp(ordering,binaryexp.args[2]) $ parsebinaryexp(ordering,binaryexp.args[3])
   end
 
-  throw(ParseError("unknown bitwise binary operator $(binaryexp.args[1])"))
+  throw(Meta.ParseError("unknown bitwise binary operator $(binaryexp.args[1])"))
 end
 
 function parsebinaryfunct(binaryfunct::Expr)
@@ -57,11 +57,11 @@ function parsebinaryfunct(binaryfunct::Expr)
     return parsebinaryexp(O,binaryfunct.args[2].args[2])
   end
 
-  throw(ParseError("unknown bitwise binary function $(binaryfunct)"))
+  throw(Meta.ParseError("unknown bitwise binary function $(binaryfunct)"))
 end
 
 function OBDD(ordering::Ordering,binaryexpstr::String)
-  binaryexp=parse(binaryexpstr)
+  binaryexp=Meta.parse(binaryexpstr)
 
   return parsebinaryexp(ordering,binaryexp)
 end
@@ -75,7 +75,7 @@ function OBDD(ordering::Array{Char,1},binaryexpstr::String)
 end
 
 function OBDD(binaryfunctstr::String)
-  binaryfunct=parse(binaryfunctstr)
+  binaryfunct=Meta.parse(binaryfunctstr)
 
   return parsebinaryfunct(binaryfunct)
 end

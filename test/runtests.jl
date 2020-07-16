@@ -1,5 +1,5 @@
 using BinaryDecisionDiagrams
-using Base.Test
+using Test
 
 a=BDD("a",BDD(true),BDD(false))
 b=BDD("a",BDD(false),BDD(true))
@@ -29,14 +29,14 @@ end
 
   BDDnodes=(()->Set(["$(node)" for node in union(ancestors(BDD(0)),ancestors(BDD(1)))]))
 
-  gc()
+  GC.gc()
   before_od=BDDnodes()
 
   od=OBDD(["d","c","b","a"],BDD("d",c,d))
   with_od=BDDnodes()
 
   od=nothing
-  gc()
+  GC.gc()
   after_od=BDDnodes()
 
   @test_broken before_od == after_od
@@ -88,7 +88,7 @@ end
   oe=OBDD(O1,binaryexp)
   of=OBDD(O2,binaryexp)
 
-  @test_throws ParseError OBDD(ordering,"(a,b)-(a&b)")
+  @test_throws Meta.ParseError OBDD(ordering,"(a,b)-(a&b)")
 
   @test_throws ArgumentError oe==of
   @test oe==changeordering(of,O1)
