@@ -2,7 +2,7 @@ abstract type BDDNode end
 
 const BinBoolType = Union{Integer,Bool}
 
-type BDDTerminal <: BDDNode
+struct BDDTerminal <: BDDNode
   value::Bool
   f_low::WeakKeyDict{BDDNode,Bool}
   f_high::WeakKeyDict{BDDNode,Bool}
@@ -48,7 +48,7 @@ function string(a::BDDTerminal)
   end
 end
 
-type BDDNonTerminal <: BDDNode
+mutable struct BDDNonTerminal <: BDDNode
   var::String
   low::BDDNode
   high::BDDNode
