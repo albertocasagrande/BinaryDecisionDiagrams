@@ -57,7 +57,7 @@ the same variable ordering, it is possible to:
 
 In julia, type
 ```julia
-julia> Pkg.clone("git://github.com/albertocasagrande/BinaryDecisionDiagrams.git")
+julia> using Pkg; Pkg.add(url="git://github.com/albertocasagrande/BinaryDecisionDiagrams.git")
 ```
 
 ## Usage
@@ -130,7 +130,7 @@ julia> o1&o2
 julia> o4=(o1|~o2)&o3
 "(a,b,c)->(a & (b & c))"
 
-julia> o1$~o4
+julia> o1 ⊻ ~o4
 "(a,b,c)->((~a & ~b) | (a & (~b | (b & ~c))))"
 ```
 
@@ -146,16 +146,43 @@ julia> o2&o3==OBDD("(a,b,c)->a&~b&(c|~c)")
 true
 ```
 
+Variable assignments can be represented as a dictionary that maps variable 
+names (the dictionary keys) to their respective assignment values 
+(the dictionary values).
+```julia
+julia> a0 = Dict("a" => 1, "c" => 1)
+Dict{String,Integer} with 2 entries:
+  "c" => 1
+  "a" => 1
+
+julia> restrict(o2, a0)
+"(a,b,c)->~b"
+
+julia> restrict(o3, a0)
+"(a,b,c)->1"
+
+julia> restrict(o2.root, a0)
+"~b"
+```
+
 Whenever the function contains a variable that is not in the ordering, an
 ArgumentError is thrown.
 ```julia
 julia> OBDD("(a,b,c)->r")
-ERROR: ArgumentError("r is not in (a,b,c)")
- in OBDD at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/parsing.jl:91
+ERROR: ArgumentError: r is not in (a,b,c)
+Stacktrace:
+ [1] respect!(::BinaryDecisionDiagrams.BDDNonTerminal, ::ListOrdering, ::Set{BinaryDecisionDiagrams.BDDNode}) at /home/alberto/.julia/packages/BinaryDecisionDiagrams/rlWsj/src/BDD.jl:188
+...
+ [8] run_repl(::REPL.AbstractREPL, ::Any) at /build/julia/src/julia-1.5.2/usr/share/julia/stdlib/v1.5/REPL/src/REPL.jl:288
+
 
 julia> OBDD(["a"],b3)
-ERROR: ArgumentError("b is not in (a)")
- in OBDD at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:10
+ERROR: ArgumentError: b is not in (a)
+Stacktrace:
+ [1] OBDD(::Array{String,1}, ::BinaryDecisionDiagrams.BDDNonTerminal) at /home/alberto/.julia/packages/BinaryDecisionDiagrams/rlWsj/src/OBDD.jl:10
+...
+ [6] run_repl(::REPL.AbstractREPL, ::Any) at /build/julia/src/julia-1.5.2/usr/share/julia/stdlib/v1.5/REPL/src/REPL.jl:288
+
 ```
 
 If the BDD does not respect the variable ordering, the constructors
@@ -163,8 +190,12 @@ If the BDD does not respect the variable ordering, the constructors
 throw an exception.
 ```julia
 julia> OBDD(["a","b"],b3)
-ERROR: ArgumentError("(~b | (b & a)) does not respect (a,b)")
- in OBDD at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:10
+ERROR: ArgumentError: (~b | (b & a)) does not respect (a,b)
+Stacktrace:
+ [1] OBDD(::Array{String,1}, ::BinaryDecisionDiagrams.BDDNonTerminal) at /home/alberto/.julia/packages/BinaryDecisionDiagrams/rlWsj/src/OBDD.jl:10
+...
+ [4] run_repl(::REPL.AbstractREPL, ::Any) at /build/julia/src/julia-1.5.2/usr/share/julia/stdlib/v1.5/REPL/src/REPL.jl:288
+
 ```
 
 However, given an OBDD `A`, a new OBDD that represents
@@ -173,7 +204,7 @@ the same function of `A`, but has a different variable ordering can be built.
 julia> o5=OBDD(["b","a"],b3)
 "(b,a)->(~b | (b & a))"
 
-julia> o6=changeordering(o4,["a","b"])
+julia> o6=changeordering(o5,["a","b"])
 "(a,b)->((~a & ~b) | a)"
 ```
 
@@ -182,17 +213,25 @@ parameters of a bitwise binary function.
 
 ```julia
 julia> o5==o6
-ERROR: ArgumentError("(b,a)->(~b | (b & a)) and (a,b)->((~a & ~b) | a) do not share the same ordering")
- in == at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:179
+ERROR: ArgumentError: (b,a)->(~b | (b & a)) and (a,b)->((~a & ~b) | a) do not share the same ordering
+Stacktrace:
+ [1] ==(::OBDD, ::OBDD) at /home/alberto/.julia/packages/BinaryDecisionDiagrams/rlWsj/src/OBDD.jl:183
+ [2] top-level scope at REPL[27]:1
+ [3] run_repl(::REPL.AbstractREPL, ::Any) at /build/julia/src/julia-1.5.2/usr/share/julia/stdlib/v1.5/REPL/src/REPL.jl:288
 
 julia> o5==OBDD(["c"],"~c")
-ERROR: ArgumentError("(b,a)->(~b | (b & a)) and (c)->(~c) do not share the same ordering")
- in == at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:179
+ERROR: ArgumentError: (b,a)->(~b | (b & a)) and (c)->~c do not share the same ordering
+Stacktrace:
+ [1] ==(::OBDD, ::OBDD) at /home/alberto/.julia/packages/BinaryDecisionDiagrams/rlWsj/src/OBDD.jl:183
+ [2] top-level scope at REPL[28]:1
+ [3] run_repl(::REPL.AbstractREPL, ::Any) at /build/julia/src/julia-1.5.2/usr/share/julia/stdlib/v1.5/REPL/src/REPL.jl:288
 
 julia> o5&OBDD(["c"],"~c")
-ERROR: ArgumentError("(b,a)->(~b | (b & a)) and (c)->(~c) do not share the same ordering")
- in applyoperator at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:89
- in & at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:113
+ERROR: ArgumentError: (b,a)->(~b | (b & a)) and (c)->~c do not share the same ordering
+Stacktrace:
+ [1] applyoperator(::Function, ::OBDD, ::OBDD) at /home/alberto/.julia/packages/BinaryDecisionDiagrams/rlWsj/src/OBDD.jl:93
+...
+ [4] run_repl(::REPL.AbstractREPL, ::Any) at /build/julia/src/julia-1.5.2/usr/share/julia/stdlib/v1.5/REPL/src/REPL.jl:288
 ```
 
 In order to either compare or pass as arguments to a bitwise binary functions
@@ -216,10 +255,12 @@ julia> o5&OBDD(["c"],"~c")
 "(b,a,c)->((~b & ~c) | (b & (a & ~c)))"
 ```
 
-Dynamic variable ordering is really handy, nevertheless, it may take time
-`O(2^{|variables|})` and, thus, it should be used sparingly.
+Dynamic variable ordering is really handy, nevertheless, 
+it may take time `O(2^{|variables|})` and, thus, it 
+should be used sparingly.
 
-Dynamic variable ordering can be disabled by using the command
+Dynamic variable ordering can be disabled by using the 
+command
 `set_static_ordering()`.
 
 ```julia
@@ -227,9 +268,56 @@ julia> set_static_ordering()
 "Dynamic variable ordering has been disabled"
 
 julia> o5==o6
-ERROR: ArgumentError("(b,a)->(~b | (b & a)) and (a,b)->((~a & ~b) | a) do not share the same ordering")
- in == at /Users/house/.julia/v0.3/BinaryDecisionDiagrams/src/OBDD.jl:179
+ERROR: ArgumentError: (b,a)->(~b | (b & a)) and (a,b)->((~a & ~b) | a) do not share the same ordering
+Stacktrace:
+ [1] ==(::OBDD, ::OBDD) at /home/alberto/.julia/packages/BinaryDecisionDiagrams/rlWsj/src/OBDD.jl:183
+ [2] top-level scope at REPL[27]:1
+ [3] run_repl(::REPL.AbstractREPL, ::Any) at /build/julia/src/julia-1.5.2/usr/share/julia/stdlib/v1.5/REPL/src/REPL.jl:288
 ```
+
+The function `SAT_assignments` returns all the 
+binary assignments of the (O)BDD variables 
+that let the binary formula represented by the 
+(O)BDD itself to be evaluated `1`, i.e., 
+those assignments that, if we replace `0` and `1` by 
+`false` and `true`, respectively, satisfy the Boolean 
+formula represented by the (O)BDD.
+
+As mentioned above, the assignments are represented by a 
+dictionary that maps the variable names in their 
+respective assignment values.
+```julia
+julia> o2
+"(a,b,c)->(~a | (a & ~b))"
+
+julia> SAT_assignments(o2)
+2-element Array{Dict{String,Integer},1}:
+ Dict("a" => 0)
+ Dict("b" => 0,"a" => 1)
+
+julia> o3
+"(a,b,c)->(a & (~b | (b & c)))"
+
+julia> a3 = SAT_assignments(o3)
+2-element Array{Dict{String,Integer},1}:
+ Dict("b" => 0,"a" => 1)
+ Dict("c" => 1,"b" => 1,"a" => 1)
+
+julia> a3[1]
+Dict{String,Integer} with 2 entries:
+  "b" => 0
+  "a" => 1
+ 
+julia> restrict(o3, a3[1])
+"(a,b,c)->1"
+```
+If a variable name does not appear in an assignment, its value is not relevant 
+for the function evaluation on that assignment. For instance, whenever `b` and 
+`a` are set to `0` and `1`, respectively, in the function 
+`(a,b,c)->(a & (~b | (b & c)))`, the function itself is evaluated as `1` 
+regardless of the value of the variable `c`. So, the assignment 
+`Dict("b" => 0, "a" => 1)` for `o3` does not specifies any constant value for 
+`c` (see above example).
 
 ## Copyright and License
 

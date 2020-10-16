@@ -9,15 +9,16 @@ struct BDDTerminal <: BDDNode
 
   function BDDTerminal(value::BinBoolType)
     if value==0 || value==false
-      value=false
+      value=0
     elseif value==1 || value==true
-      value=true
+      value=1
     else
       throw(ArgumentError("expected a binary value, got $(value)"))
     end
 
     if !haskey(Tnodes,value)
-      Tnodes[value]=new(value,WeakKeyDict{BDDNode,Bool}(),WeakKeyDict{BDDNode,Bool}())
+      Tnodes[value]=new(value,WeakKeyDict{BDDNode,Bool}(),
+                              WeakKeyDict{BDDNode,Bool}())
     end
 
     return Tnodes[value]
@@ -73,13 +74,42 @@ mutable struct BDDNonTerminal <: BDDNode
         return node
       end
     end
-    node=new(var,low,high,WeakKeyDict{BDDNode,Bool}(),WeakKeyDict{BDDNode,Bool}())
+    node=new(var,low,high,WeakKeyDict{BDDNode,Bool}(),
+                          WeakKeyDict{BDDNode,Bool}())
 
     high.f_high[node]=true
     low.f_low[node]=true
 
     return node
   end
+end
+
+
+function SAT_assignments!(A::Array{Dict{String, BinBoolType}}, 
+                          tmp_a::Dict{String, BinBoolType}, 
+                          node::BDDNode)
+  if typeof(node)==BDDTerminal
+    if node.value==true || node.value==1
+      push!(A, copy(tmp_a))
+    end
+  else
+    tmp_a[node.var] = 0
+    SAT_assignments!(A, tmp_a, node.low)
+  
+    tmp_a[node.var] = 1
+    SAT_assignments!(A, tmp_a, node.high)
+  
+    delete!(tmp_a, node.var)
+  end 
+end
+
+function SAT_assignments(node::BDDNode)::Array{Dict{String, BinBoolType}}
+  tmp_a = Dict{String, BinBoolType}()
+  A = Dict{String, BinBoolType}[]
+  
+  SAT_assignments!(A, tmp_a, node)
+
+  return A
 end
 
 function invert!(a::BDDNonTerminal,result_cache=Dict())
@@ -315,11 +345,22 @@ function restrict!(A::BDDNode,var::String,value::Bool,result_cache::Dict)
   return result_cache[A]
 end
 
+function restrict(A::BDDNode, assignment::Dict{String})
+   new_node = A
+
+   for (var, value) in assignment
+      new_node = restrict(new_node, var, value)
+   end
+
+   return new_node
+end
+
 function restrict(A::BDDNode,var::String,value::Bool)
   return restrict!(A,var,value,Dict())
 end
 
-function computerestriction!(A::BDDNode,var::String,value::Bool,result_cache::Dict)
+function computerestriction!(A::BDDNode,var::String,value::Bool,
+                             result_cache::Dict)
   if typeof(A)==BDDTerminal
     return A
   end

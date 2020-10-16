@@ -27,7 +27,8 @@ end
   otrue=OBDD(oa.ordering,BDD(true))
   ofalse=OBDD(oa.ordering,BDD(false))
 
-  BDDnodes=(()->Set(["$(node)" for node in union(ancestors(BDD(0)),ancestors(BDD(1)))]))
+  BDDnodes=(()->Set(["$(node)" for node in union(ancestors(BDD(0)),
+                                                 ancestors(BDD(1)))]))
 
   GC.gc()
   before_od=BDDnodes()

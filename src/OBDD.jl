@@ -38,6 +38,10 @@ struct OBDD
   end
 end
 
+function SAT_assignments(T::OBDD)::Array{Dict{String, BinBoolType}}
+  return SAT_assignments(T.root)
+end
+
 function string(A::OBDD)
   if typeof(A.ordering) == ListOrdering
     ordstr=string(A.ordering)
@@ -201,5 +205,10 @@ end
 
 function restrict(A::OBDD,var::String,value)
   root=restrict(A.root,var,value)
+  return OBDD(A.ordering,root)
+end
+
+function restrict(A::OBDD, assignment::Dict{String, BinBoolType})
+  root=restrict(A.root,assignment)
   return OBDD(A.ordering,root)
 end
