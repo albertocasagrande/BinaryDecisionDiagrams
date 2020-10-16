@@ -55,14 +55,20 @@ the same variable ordering, it is possible to:
 
 ## Installation
 
-In julia, type
+In Julia, type
 ```julia
 julia> using Pkg; Pkg.add(url="git://github.com/albertocasagrande/BinaryDecisionDiagrams.git")
 ```
 
+## Update 
+In Julia, type
+```julia
+julia> using Pkg; Pkg.update()
+```
+
 ## Usage
 
-In order to use the package, type in julia
+In order to use the package, type in Julia
 ```julia
 using BinaryDecisionDiagrams
 ```
