@@ -44,43 +44,65 @@ end
   @test before_od != with_od
   @test issubset(before_od,with_od)
 
-  @test oc == OBDD(ordering,"b|a")
-  @test OBDD(string(oa)) == oa
-  @test OBDD(string(oc)) == oc
-  @test OBDD(string(~oa)) == ~oa
-  @test OBDD(string(~ob)) == ~ob
-  @test OBDD(string(~oc)) == ~oc
-  @test OBDD(string(oa|ob)) == oa|ob
-  @test OBDD(string(oa|ob)) == OBDD(string(oa))|OBDD(string(ob))
-  @test (~~oa).root == oa.root
-  @test ~~oa == oa
-  @test oa&oa == oa
-  @test oa|oa == oa
-  @test ~oa&oa == OBDD(oa.ordering,BDD(false))
-  @test ~oa|oa == OBDD(oa.ordering,BDD(true))
-  @test oa&BDD(false) == BDD(false)&oa
-  @test oa&false == false&oa
-  @test oa&0 == 0&oa
-  @test oa&BDD(false) == ofalse
-  @test oa&BDD(true) == BDD(true)&oa
-  @test BDD(true)&oa == oa&BDD(true)
-  @test true&oa == oa&true
-  @test 1&oa == oa&1
-  @test oa&true == oa
-  @test oa|true == otrue
-  @test oa|false == oa
-  @test oa|ob == ~(~oa & ~ob)
-  @test oa|ob == ob|oa
-  @test oa&ob == ~(~oa | ~ob)
-  @test oa&ob == ob&oa
-  @test oa⊻ob == ob⊻oa
-  @test otrue⊻otrue == ofalse
-  @test ofalse⊻ofalse == ofalse
-  @test otrue⊻ofalse == otrue
-  @test ofalse⊻otrue == otrue
-  @test restrict(oc,"b",1) == otrue
-  @test restrict(oc,"b",0) == OBDD(oc.ordering,"a")
+  @testset "Parsing" begin
+    @test oc == OBDD(ordering,"b|a")
+    @test OBDD(string(oa)) == oa
+    @test OBDD(string(oc)) == oc
+    @test OBDD(string(~oa)) == ~oa
+    @test OBDD(string(~ob)) == ~ob
+    @test OBDD(string(~oc)) == ~oc
+    @test OBDD(string(oa|ob)) == oa|ob
+    @test OBDD(string(oa|ob)) == OBDD(string(oa))|OBDD(string(ob))
+  
+    @test_throws Meta.ParseError OBDD(ordering,"(a,b)-(a&b)")
+  end
 
+  @testset "Bitwise operators" begin
+    @test (~~oa).root == oa.root
+    @test ~~oa == oa
+    @test oa&oa == oa
+    @test oa|oa == oa
+    @test ~oa&oa == OBDD(oa.ordering,BDD(false))
+    @test ~oa|oa == OBDD(oa.ordering,BDD(true))
+    @test oa&BDD(false) == BDD(false)&oa
+    @test oa&false == false&oa
+    @test oa&0 == 0&oa
+    @test oa&BDD(false) == ofalse
+    @test oa&BDD(true) == BDD(true)&oa
+    @test BDD(true)&oa == oa&BDD(true)
+    @test true&oa == oa&true
+    @test 1&oa == oa&1
+    @test oa&true == oa
+    @test oa|true == otrue
+    @test oa|false == oa
+    @test oa|ob == ~(~oa & ~ob)
+    @test oa|ob == ob|oa
+    @test oa&ob == ~(~oa | ~ob)
+    @test oa&ob == ob&oa
+    @test oa⊻ob == ob⊻oa
+    @test otrue⊻otrue == ofalse
+    @test ofalse⊻ofalse == ofalse
+    @test otrue⊻ofalse == otrue
+    @test ofalse⊻otrue == otrue
+  end
+
+  ab = SAT_assignments(ob)
+  aa = SAT_assignments(oa)  
+  @testset "SAT" begin
+    @test ab == Dict{String,Integer}[Dict("c" => 0), Dict("c" =>1,"a" => 0)]
+    @test aa == Dict{String,Integer}[Dict("b" =>0,"a" => 1)]
+  end
+
+  @testset "Restrictions" begin
+    @test restrict(oc,"b",1) == otrue
+    @test restrict(oc,"b",0) == OBDD(oc.ordering,"a")
+    
+    for a in ab
+      @test restrict(ob, a) == otrue
+    end
+
+    @test restrict(ob, aa[1]) == OBDD("(c,b,a)-> ~c")
+  end 
 
   binaryexp="a|~c&b"
   O1=['c','a','b']
@@ -89,17 +111,17 @@ end
   oe=OBDD(O1,binaryexp)
   of=OBDD(O2,binaryexp)
 
-  @test_throws Meta.ParseError OBDD(ordering,"(a,b)-(a&b)")
+  @testset "Variable orderings" begin
+    @test_throws ArgumentError oe==of
+    @test oe==changeordering(of,O1)
 
-  @test_throws ArgumentError oe==of
-  @test oe==changeordering(of,O1)
+    set_dynamic_ordering()
 
-  set_dynamic_ordering()
+    @test oe==of
+    @test OBDD(["x"],"x")|(~oe&of)==(of&~oe)|OBDD(["x"],"x")
 
-  @test oe==of
-  @test OBDD(["x"],"x")|(~oe&of)==(of&~oe)|OBDD(["x"],"x")
+    set_static_ordering()
 
-  set_static_ordering()
-
-  @test_throws ArgumentError oe==of
+    @test_throws ArgumentError oe==of
+  end
 end
