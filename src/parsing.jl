@@ -20,7 +20,7 @@ function parsebinaryexp(ordering::Ordering,binaryexp::Expr)
   end
 
   if binaryexp.head == :||
-    return parsebinaryexp(ordering,binaryexp.args[1])&parsebinaryexp(ordering,binaryexp.args[1])
+    return parsebinaryexp(ordering,binaryexp.args[1])|parsebinaryexp(ordering,binaryexp.args[1])
   end
 
   if binaryexp.head != :call
@@ -31,11 +31,11 @@ function parsebinaryexp(ordering::Ordering,binaryexp::Expr)
     return ~parsebinaryexp(ordering,binaryexp.args[2])
   end
 
-  if binaryexp.args[1] == :&
+  if binaryexp.args[1] == :& || binaryexp.args[1] == :*
     return parsebinaryexp(ordering,binaryexp.args[2])&parsebinaryexp(ordering,binaryexp.args[3])
   end
 
-  if binaryexp.args[1] == :|
+  if binaryexp.args[1] == :| || binaryexp.args[1] == :+
     return parsebinaryexp(ordering,binaryexp.args[2])|parsebinaryexp(ordering,binaryexp.args[3])
   end
 
