@@ -63,7 +63,8 @@ function addgreatest!(O::ListOrdering,var::String)
 end
 
 function convert(::Type{Array{String,1}},O::ListOrdering)
-  return sort!(String[key for key in keys(O.ordering)],lt=((a,b)->inorder(O,a,b)))
+  return sort!(String[key for key in keys(O.ordering)],
+               lt=((a,b)->inorder(O,a,b)))
 end
 
 function variablesin(O::ListOrdering)

@@ -93,12 +93,18 @@ function SAT_assignments!(A::Array{Dict{String, BinBoolType}},
       push!(A, copy(tmp_a))
     end
   else
-    tmp_a[node.var] = 0
+    if (typeof(node.high)!=BDDTerminal ||
+        node.high.value==false || node.high.value==0)
+      tmp_a[node.var] = 0
+    end
     SAT_assignments!(A, tmp_a, node.low)
-  
-    tmp_a[node.var] = 1
+    delete!(tmp_a, node.var)
+
+    if (typeof(node.low)!=BDDTerminal ||
+        node.low.value==false || node.low.value==0)
+      tmp_a[node.var] = 1
+    end
     SAT_assignments!(A, tmp_a, node.high)
-  
     delete!(tmp_a, node.var)
   end 
 end
@@ -269,7 +275,8 @@ function variables(A::BDDNode)
   return vars
 end
 
-function applyoperator!(operator::Function,A::BDDNode,B::BDDNode,O::Ordering,result_cache::Dict)
+function applyoperator!(operator::Function,A::BDDNode,B::BDDNode,
+                        O::Ordering,result_cache::Dict)
   if !haskey(result_cache,A)
     result_cache[A]=Dict()
   end
@@ -287,7 +294,8 @@ function applyoperator(operator::Function,A::BDDNode,B::BDDNode,O::Ordering)
   return applyoperator!(operator,A,B,O,Dict())
 end
 
-function compute!(operator::Function,A::BDDNode,B::BDDNode, O::Ordering,result_cache::Dict)
+function compute!(operator::Function,A::BDDNode,B::BDDNode,
+                  O::Ordering,result_cache::Dict)
   if typeof(A)==BDDTerminal
     if typeof(B)==BDDTerminal
       return BDD(operator(A.value,B.value))

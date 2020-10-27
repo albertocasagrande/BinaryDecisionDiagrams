@@ -1,6 +1,6 @@
 name = "BinaryDecisionDiagrams"
 uuid = "2f8eb075-51c6-55a6-91ac-1badc2a46d84"
-version = "0.1.0"
+version = "0.1.2"
 authors = ["Alberto Casagrande <acasagrande@units.it>"]
 
 [compat]

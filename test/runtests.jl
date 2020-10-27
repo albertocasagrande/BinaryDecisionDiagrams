@@ -6,6 +6,11 @@ b=BDD("a",BDD(false),BDD(true))
 c=BDD("b",b,BDD(false))
 d=BDD("c",BDD(true),a)
 e=BDD("c",BDD(true),a)
+f=BDD("a",BDD(true),
+          BDD("b",BDD("c",
+                      BDD(false),
+                      BDD(true)),
+                  BDD(false)))
 
 @testset "BDD tests" begin
   @test string(a) == "~a"
@@ -52,6 +57,12 @@ end
     @test OBDD(string(~ob)) == ~ob
     @test OBDD(string(~oc)) == ~oc
     @test OBDD(string(oa|ob)) == oa|ob
+
+    oe = OBDD(["c","a"], d)
+    @test oe =="(~c || (c && ~a))"
+    @test oe == "~c + (c*~a)"
+
+    @test OBDD(["a","b","c"], f) == "a->(~b&c)"
     @test OBDD(string(oa|ob)) == OBDD(string(oa))|OBDD(string(ob))
   
     @test_throws Meta.ParseError OBDD(ordering,"(a,b)-(a&b)")
@@ -89,8 +100,8 @@ end
   ab = SAT_assignments(ob)
   aa = SAT_assignments(oa)  
   @testset "SAT" begin
-    @test ab == Dict{String,Integer}[Dict("c" => 0), Dict("c" =>1,"a" => 0)]
-    @test aa == Dict{String,Integer}[Dict("b" =>0,"a" => 1)]
+    @test Set(ab) == Set([Dict("c" => 0), Dict("a" => 0)])
+    @test Set(aa) == Set([Dict("b" =>0,"a" => 1)])
   end
 
   @testset "Restrictions" begin

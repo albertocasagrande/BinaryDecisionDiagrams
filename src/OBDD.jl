@@ -203,6 +203,14 @@ function ==(a::BinBoolType,B::OBDD)
   return B.root == BDD(a)
 end
 
+function ==(A::OBDD,b::String)
+  return A == OBDD(A.ordering,b)
+end
+
+function ==(a::String,B::OBDD)
+  return OBDD(B.ordering,a) == B
+end
+
 function restrict(A::OBDD,var::String,value)
   root=restrict(A.root,var,value)
   return OBDD(A.ordering,root)
