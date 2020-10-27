@@ -16,11 +16,15 @@ end
 
 function parsebinaryexp(ordering::Ordering,binaryexp::Expr)
   if binaryexp.head == :&&
-    return parsebinaryexp(ordering,binaryexp.args[1])&parsebinaryexp(ordering,binaryexp.args[1])
+    return parsebinaryexp(ordering,binaryexp.args[1])&parsebinaryexp(ordering,binaryexp.args[2])
   end
 
   if binaryexp.head == :||
-    return parsebinaryexp(ordering,binaryexp.args[1])|parsebinaryexp(ordering,binaryexp.args[1])
+    return parsebinaryexp(ordering,binaryexp.args[1])|parsebinaryexp(ordering,binaryexp.args[2])
+  end
+
+  if binaryexp.head == :->
+    return (~parsebinaryexp(ordering,binaryexp.args[1]))|parsebinaryexp(ordering,binaryexp.args[2].args[2])
   end
 
   if binaryexp.head != :call
